@@ -1,15 +1,18 @@
 const express = require('express');
 const { default: mongoose, Schema } = require("mongoose");
+const cors = require('cors')
 const fs = require('fs');
 const readline = require('readline');
 const events = require('events');
 require('dotenv').config();
 
+const app = express();
+app.use(cors());
+
 // Models
 const productModel = require("./models/product.js");
 
-const app = express();
-const jsonParser = express.json();
+//const jsonParser = express.json();
 
 const DB_CONNECTION = process.env.DB_CONNECTION;
 console.log(DB_CONNECTION);
@@ -35,11 +38,7 @@ app.get("/add-product-test", async (req, res) => {
 
 app.get("/get-products", async (req, res) => {
     const products = await productModel.find({});
-    var productsMap = {};
-    products?.forEach(function (product) {
-        productsMap[product._id] = product;
-    });
-    res.send(productsMap);
+    res.send(products);
 });
 
 
