@@ -15,7 +15,6 @@ const productModel = require("./models/product.js");
 //const jsonParser = express.json();
 
 const DB_CONNECTION = process.env.DB_CONNECTION;
-console.log(DB_CONNECTION);
 const connectToDatabase = async () => {
     try {
         await mongoose.connect(DB_CONNECTION);
@@ -41,6 +40,19 @@ app.get("/get-products", async (req, res) => {
     res.send(products);
 });
 
+app.get("/get-product", async (req, res) => {
+    const id = req.query.id
+    if (id === undefined) {
+        res.status(400).send("No id prodived");
+        return;
+    }
+    try {
+        const product = await productModel.findById(id);
+        res.send(product);
+    } catch (error) {
+        res.status(404).send(`Nothing found by id ${id}.`);
+    }
+});
 
 const PORT = 9312;
 app.listen(PORT, () => {
