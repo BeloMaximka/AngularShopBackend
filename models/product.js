@@ -1,13 +1,10 @@
 const { Schema, model } = require('mongoose');
 
-const minDate = new Date();
-minDate.setDate(minDate.getDate() - 2);
-
 const productSchema = new Schema({
     name: {
         type: String,
         required: true,
-        validate: /[\w\s]+/
+        validate: /[A-z\s]+/
     },
     image: {
         type: String,
@@ -16,6 +13,11 @@ const productSchema = new Schema({
     price: {
         type: Number,
         required: true
+    },
+    description: {
+        type: String,
+        required: true,
+        validate: /[\w\s]+/
     },
 });
 
