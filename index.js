@@ -80,7 +80,7 @@ app.post("/add-comment", async (req, res) => {
         const { productId, text } = req.body;
         const newComment = new productCommentModel({ productId, text });
         const result = await newComment.save();
-        res.status(201).json({ success: "OK", id: result._id });
+        res.status(201).send(result);
     } catch (error) {
         console.log(error);
         res.status(500).send("Error adding comment to database: " + error);
