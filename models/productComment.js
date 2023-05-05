@@ -8,7 +8,7 @@ const productCommentSchema = new Schema({
     text: {
         type: String,
         required: true,
-        validate: /\w+/
+        validate: /.+/
     },
 });
 

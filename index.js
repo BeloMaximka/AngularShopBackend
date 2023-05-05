@@ -1,9 +1,7 @@
 const express = require('express');
-const { default: mongoose, Schema } = require("mongoose");
+const { default: mongoose } = require("mongoose");
+const { replaceWithEqualSymbols, forbiddenWordsPattern } = require("./services/stringService.js");
 const cors = require('cors')
-const fs = require('fs');
-const readline = require('readline');
-const events = require('events');
 require('dotenv').config();
 
 const app = express();
@@ -69,9 +67,10 @@ app.get("/get-comments", async (req, res) => {
     }
     try {
         const comment = await productCommentModel.find({ productId: id }).sort({_id: -1});
+        comment.forEach(v => v.text = replaceWithEqualSymbols(v.text, "*", forbiddenWordsPattern));
         res.send(comment);
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).send("Error occured: " + error);
     }
 });
 
