@@ -5,7 +5,7 @@ const productCommentSchema = new Schema({
         type: Types.ObjectId,
         required: true,
     },
-    comment: {
+    text: {
         type: String,
         required: true,
         validate: /\w+/

@@ -8,12 +8,11 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 // Models
 const productModel = require("./models/product.js");
 const productCommentModel = require("./models/productComment.js");
-
-//const jsonParser = express.json();
 
 const DB_CONNECTION = process.env.DB_CONNECTION;
 const connectToDatabase = async () => {
@@ -36,7 +35,7 @@ app.get("/add-product-test", async (req, res) => {
     });
     const comment = await productCommentModel.insertMany({
         productId: result[0]._id,
-        comment: 'So great'
+        text: 'So great'
     });
     res.send(result + comment);
 });
@@ -68,14 +67,25 @@ app.get("/get-comments", async (req, res) => {
         res.status(400).send("No id prodived");
         return;
     }
-    //id = new mongoose.Types.ObjectId(id);
-    //console.log(id);
     try {
-        const comment = await productCommentModel.find({ productId: id });
+        const comment = await productCommentModel.find({ productId: id }).sort({_id: -1});
         res.send(comment);
     } catch (error) {
-        res.status(404).send(`Nothing found by id ${id}.`);
+        res.status(500).send(error);
     }
+});
+
+app.post("/add-comment", async (req, res) => {
+    try {
+        const { productId, text } = req.body;
+        const newComment = new productCommentModel({ productId, text });
+        const result = await newComment.save();
+        res.status(201).json({ success: "OK", id: result._id });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error adding comment to database: " + error);
+    }
+
 });
 
 const PORT = 9312;
