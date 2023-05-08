@@ -41,7 +41,8 @@ app.get("/add-product-test", async (req, res) => {
 app.get("/get-products", async (req, res) => {
     const includeDescription = req.query.description === "true";
     const includePrice = req.query.price === "true";
-    const products = await productModel.find({}).select(`name image ${includeDescription ? 'description' : ''} ${includePrice ? 'price' : ''}`);
+    const products = await productModel.find({}).sort({_id: -1})
+            .select(`name image ${includeDescription ? 'description' : ''} ${includePrice ? 'price' : ''}`);
     res.send(products);
 });
 
