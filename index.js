@@ -59,6 +59,18 @@ app.get("/get-product", async (req, res) => {
     }
 });
 
+app.post("/add-product", async (req, res) => {
+    try {
+        const { name, image, price, description } = req.body;
+        const newProduct = new productModel({ name, image, price, description });
+        const result = await newProduct.save();
+        res.status(201).send(result);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error adding product to database: " + error);
+    }
+});
+
 app.get("/get-comments", async (req, res) => {
     let id = req.query.id
     if (id === undefined) {
