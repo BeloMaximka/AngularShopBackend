@@ -72,6 +72,18 @@ app.post("/add-product", async (req, res) => {
     }
 });
 
+app.post("/remove-product", async (req, res) => {
+    try {
+        const { id } = req.body;
+        await productCommentModel.deleteMany({ productId: id });
+        const result = await productModel.findOneAndDelete(id);
+        res.status(200).send(result);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error removing product from database: " + error);
+    }
+});
+
 app.get("/get-comments", async (req, res) => {
     let id = req.query.id
     if (id === undefined) {
