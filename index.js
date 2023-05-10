@@ -2,11 +2,18 @@ const express = require('express');
 const { default: mongoose } = require("mongoose");
 const { replaceWithEqualSymbols, forbiddenWordsPattern } = require("./services/stringService.js");
 const cors = require('cors')
+const path = require('path');
 require('dotenv').config();
+const fs = require('fs')
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+if (!fs.existsSync("./.env")) {
+    console.log("ERROR! Missing .env file in root folder. Don't forget to add DB_CONNECTION=\"STRING\" in there.");
+    return;
+}
 
 // Models
 const productModel = require("./models/product.js");
@@ -24,6 +31,9 @@ const connectToDatabase = async () => {
 }
 
 connectToDatabase();
+
+app.use('/', express.static('dist/shop'));
+
 
 app.get("/add-product-test", async (req, res) => {
     const result = await productModel.insertMany({
@@ -152,9 +162,8 @@ app.post("/add-to-shopping-cart", async (req, res) => {
 
         const newCartItem = new shoppingCartItemModel({ product: productId, count });
         const result = await newCartItem.save();
-        const product = await productModel.findById(productId);
-        product.count = result.count;
-        res.status(201).send(product);
+        result.product = await productModel.findById(productId);
+        res.status(201).send(result);
     } catch (error) {
         console.log(error);
         res.status(500).send("Error adding shopping cart item to database: " + error);
