@@ -163,11 +163,26 @@ app.post("/add-to-shopping-cart", async (req, res) => {
 app.post("/remove-from-shopping-cart", async (req, res) => {
     try {
         const { id } = req.body;
-        const result = await shoppingCartItemModel.findOneAndDelete({ productId: id });
+        const result = await shoppingCartItemModel.findOneAndDelete({ product: id });
         res.status(200).send(result._id);
     } catch (error) {
         console.log(error);
         res.status(500).send("Error removing product from shopping cart: " + error);
+    }
+});
+
+app.post("/update-shopping-cart-item-count", async (req, res) => {
+    try {
+        const { id, count } = req.body;
+        if(count < 1) {
+            res.status(400).send("Count cannot be less than 1");
+            return;
+        }
+        const result = await shoppingCartItemModel.updateMany({ product: id }, { count });
+        res.status(200).send(result.modifiedCount > 0);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error updating shopping cart item: " + error);
     }
 });
 
