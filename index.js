@@ -42,8 +42,8 @@ app.get("/add-product-test", async (req, res) => {
 app.get("/get-products", async (req, res) => {
     const includeDescription = req.query.description === "true";
     const includePrice = req.query.price === "true";
-    const products = await productModel.find({}).sort({_id: -1})
-            .select(`name image ${includeDescription ? 'description' : ''} ${includePrice ? 'price' : ''}`);
+    const products = await productModel.find({}).sort({ _id: -1 })
+        .select(`name image ${includeDescription ? 'description' : ''} ${includePrice ? 'price' : ''}`);
     res.send(products);
 });
 
@@ -92,7 +92,7 @@ app.get("/get-comments", async (req, res) => {
         return;
     }
     try {
-        const comment = await productCommentModel.find({ productId: id }).sort({_id: -1});
+        const comment = await productCommentModel.find({ productId: id }).sort({ _id: -1 });
         comment.forEach(v => v.text = replaceWithEqualSymbols(v.text, "*", forbiddenWordsPattern));
         res.send(comment);
     } catch (error) {
@@ -105,6 +105,7 @@ app.post("/add-comment", async (req, res) => {
         const { productId, text } = req.body;
         const newComment = new productCommentModel({ productId, text });
         const result = await newComment.save();
+        result.text = replaceWithEqualSymbols(result.text, "*", forbiddenWordsPattern);
         res.status(201).send(result);
     } catch (error) {
         console.log(error);
@@ -174,7 +175,7 @@ app.post("/remove-from-shopping-cart", async (req, res) => {
 app.post("/update-shopping-cart-item-count", async (req, res) => {
     try {
         const { id, count } = req.body;
-        if(count < 1) {
+        if (count < 1) {
             res.status(400).send("Count cannot be less than 1");
             return;
         }

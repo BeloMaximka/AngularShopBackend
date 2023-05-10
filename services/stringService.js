@@ -1,4 +1,4 @@
-const forbiddenWordsPattern = /кокос|банан|плохой|@/g
+const forbiddenWordsPattern = /кокос|банан|плохой|@/gi
 
 function replaceWithEqualSymbols(string, symbol, pattern) {
     return string.replaceAll(pattern, (element) => {
