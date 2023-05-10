@@ -11,6 +11,7 @@ app.use(express.json());
 // Models
 const productModel = require("./models/product.js");
 const productCommentModel = require("./models/productComment.js");
+const shoppingCartItemModel = require("./models/shoppingCartItem.js");
 
 const DB_CONNECTION = process.env.DB_CONNECTION;
 const connectToDatabase = async () => {
@@ -109,7 +110,53 @@ app.post("/add-comment", async (req, res) => {
         console.log(error);
         res.status(500).send("Error adding comment to database: " + error);
     }
+});
 
+app.get("/shopping-cart-item-exists", async (req, res) => {
+    try {
+        const stringId = req.query.id;
+        if (stringId === undefined) {
+            res.status(400).send("No id prodived");
+            return;
+        }
+        let id;
+        try {
+            id = new mongoose.Types.ObjectId(stringId);
+        } catch (error) {
+            console.log(error);
+            res.status(400).send("Error: " + error);
+        }
+
+        const result = await shoppingCartItemModel.exists({ product: id });
+        res.status(200).send(result?._id !== undefined);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error: " + error);
+    }
+});
+
+app.get("/get-shopping-cart", async (req, res) => {
+    const cart = await shoppingCartItemModel.find({}).populate('product');
+    res.status(200).send(cart);
+});
+app.post("/add-to-shopping-cart", async (req, res) => {
+    try {
+        const { productId, count } = req.body;
+
+        if (await shoppingCartItemModel.exists({ product: productId })) {
+            res.status(400).send("Already exists.");
+            return
+        }
+
+        const newCartItem = new shoppingCartItemModel({ product: productId, count });
+        const result = await newCartItem.save();
+        const product = await productModel.findById(productId);
+        product.count = result.count;
+        res.status(201).send(product);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error adding shopping cart item to database: " + error);
+    }
 });
 
 const PORT = 9312;
