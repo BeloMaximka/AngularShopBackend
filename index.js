@@ -34,21 +34,6 @@ connectToDatabase();
 
 app.use('/', express.static('dist/shop'));
 
-
-app.get("/add-product-test", async (req, res) => {
-    const result = await productModel.insertMany({
-        name: "Bulka",
-        description: "A bulka.",
-        image: "https://content.silpo.ua/sku/ecommerce/74/480x480wwm/742144_480x480wwm_041d0957-56f5-165c-a9cd-11692195c862.png",
-        price: 20
-    });
-    const comment = await productCommentModel.insertMany({
-        productId: result[0]._id,
-        text: 'So great'
-    });
-    res.send(result + comment);
-});
-
 app.get("/get-products", async (req, res) => {
     const includeDescription = req.query.description === "true";
     const includePrice = req.query.price === "true";
