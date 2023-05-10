@@ -186,6 +186,16 @@ app.post("/update-shopping-cart-item-count", async (req, res) => {
     }
 });
 
+app.post("/clear-shopping-cart", async (req, res) => {
+    try {
+        const result = await shoppingCartItemModel.deleteMany({});
+        res.status(200).send(result.deletedCount > 0);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error updating shopping cart item: " + error);
+    }
+});
+
 const PORT = 9312;
 app.listen(PORT, () => {
     console.log(`listening at port: ${PORT}`);
