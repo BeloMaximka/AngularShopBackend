@@ -139,6 +139,7 @@ app.get("/get-shopping-cart", async (req, res) => {
     const cart = await shoppingCartItemModel.find({}).populate('product');
     res.status(200).send(cart);
 });
+
 app.post("/add-to-shopping-cart", async (req, res) => {
     try {
         const { productId, count } = req.body;
@@ -156,6 +157,17 @@ app.post("/add-to-shopping-cart", async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).send("Error adding shopping cart item to database: " + error);
+    }
+});
+
+app.post("/remove-from-shopping-cart", async (req, res) => {
+    try {
+        const { id } = req.body;
+        const result = await shoppingCartItemModel.findOneAndDelete({ productId: id });
+        res.status(200).send(result._id);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error removing product from shopping cart: " + error);
     }
 });
 
