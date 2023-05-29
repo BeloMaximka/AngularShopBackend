@@ -25,6 +25,10 @@ const connectToDatabase = async () => {
     try {
         await mongoose.connect(DB_CONNECTION);
         console.log('connected');
+		const PORT = 9312;
+		app.listen(PORT, () => {
+			console.log(`listening at port: ${PORT}`);
+		});
     } catch (error) {
         console.log(error);
     }
@@ -189,9 +193,4 @@ app.post("/clear-shopping-cart", async (req, res) => {
         console.log(error);
         res.status(500).send("Error updating shopping cart item: " + error);
     }
-});
-
-const PORT = 9312;
-app.listen(PORT, () => {
-    console.log(`listening at port: ${PORT}`);
 });
