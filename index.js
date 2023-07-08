@@ -38,7 +38,7 @@ connectToDatabase();
 
 app.use('/', express.static('dist/shop'));
 
-app.get("/get-products", async (req, res) => {
+app.get("/products", async (req, res) => {
     const includeDescription = req.query.description === "true";
     const includePrice = req.query.price === "true";
     const products = await productModel.find({}).sort({ _id: -1 })
@@ -46,12 +46,8 @@ app.get("/get-products", async (req, res) => {
     res.send(products);
 });
 
-app.get("/get-product", async (req, res) => {
-    const id = req.query.id
-    if (id === undefined) {
-        res.status(400).send("No id prodived");
-        return;
-    }
+app.get("/products/:id", async (req, res) => {
+    const id = req.params.id
     try {
         const product = await productModel.findById(id);
         res.send(product);
@@ -60,7 +56,7 @@ app.get("/get-product", async (req, res) => {
     }
 });
 
-app.post("/add-product", async (req, res) => {
+app.post("/products", async (req, res) => {
     try {
         const { name, image, price, description } = req.body;
         const newProduct = new productModel({ name, image, price, description });
@@ -68,13 +64,13 @@ app.post("/add-product", async (req, res) => {
         res.status(201).send(result);
     } catch (error) {
         console.log(error);
-        res.status(500).send("Error adding product to database: " + error);
+        res.status(500).send("Error occured while adding product to database: " + error);
     }
 });
 
-app.post("/remove-product", async (req, res) => {
+app.delete("/products/:id", async (req, res) => {
     try {
-        const { id } = req.body;
+        const id = req.params.id;
         await productCommentModel.deleteMany({ productId: id });
         const result = await productModel.findOneAndDelete(id);
         res.status(200).send(result);
@@ -84,8 +80,8 @@ app.post("/remove-product", async (req, res) => {
     }
 });
 
-app.get("/get-comments", async (req, res) => {
-    let id = req.query.id
+app.get("/comments/:id", async (req, res) => {
+    let id = req.params.id
     if (id === undefined) {
         res.status(400).send("No id prodived");
         return;
@@ -99,7 +95,7 @@ app.get("/get-comments", async (req, res) => {
     }
 });
 
-app.post("/add-comment", async (req, res) => {
+app.post("/comments", async (req, res) => {
     try {
         const { productId, text } = req.body;
         const newComment = new productCommentModel({ productId, text });
@@ -112,9 +108,9 @@ app.post("/add-comment", async (req, res) => {
     }
 });
 
-app.get("/shopping-cart-item-exists", async (req, res) => {
+app.get("/shopping-cart-item-exists/:id", async (req, res) => {
     try {
-        const stringId = req.query.id;
+        const stringId = req.params.id;
         if (stringId === undefined) {
             res.status(400).send("No id prodived");
             return;
@@ -135,12 +131,12 @@ app.get("/shopping-cart-item-exists", async (req, res) => {
     }
 });
 
-app.get("/get-shopping-cart", async (req, res) => {
+app.get("/shopping-cart-items", async (req, res) => {
     const cart = await shoppingCartItemModel.find({}).populate('product');
     res.status(200).send(cart);
 });
 
-app.post("/add-to-shopping-cart", async (req, res) => {
+app.post("/shopping-cart-items", async (req, res) => {
     try {
         const { productId, count } = req.body;
 
@@ -159,9 +155,9 @@ app.post("/add-to-shopping-cart", async (req, res) => {
     }
 });
 
-app.post("/remove-from-shopping-cart", async (req, res) => {
+app.delete("/shopping-cart-items/:id", async (req, res) => {
     try {
-        const { id } = req.body;
+        const id = req.params.id;
         const result = await shoppingCartItemModel.findOneAndDelete({ product: id });
         res.status(200).send(result._id);
     } catch (error) {
@@ -170,25 +166,26 @@ app.post("/remove-from-shopping-cart", async (req, res) => {
     }
 });
 
-app.post("/update-shopping-cart-item-count", async (req, res) => {
+app.delete("/shopping-cart-items", async (req, res) => {
     try {
-        const { id, count } = req.body;
-        if (count < 1) {
-            res.status(400).send("Count cannot be less than 1");
-            return;
-        }
-        const result = await shoppingCartItemModel.updateMany({ product: id }, { count });
-        res.status(200).send(result.modifiedCount > 0);
+        const result = await shoppingCartItemModel.deleteMany({});
+        res.status(200).send(result.deletedCount > 0);
     } catch (error) {
         console.log(error);
         res.status(500).send("Error updating shopping cart item: " + error);
     }
 });
 
-app.post("/clear-shopping-cart", async (req, res) => {
+app.put("/shopping-cart-items/:id", async (req, res) => {
     try {
-        const result = await shoppingCartItemModel.deleteMany({});
-        res.status(200).send(result.deletedCount > 0);
+        const id = req.params.id;
+        const { count } = req.body;
+        if (count < 1) {
+            res.status(400).send("Count cannot be less than 1");
+            return;
+        }
+        const result = await shoppingCartItemModel.updateMany({ product: id }, { count });
+        res.status(200).send(result.modifiedCount > 0);
     } catch (error) {
         console.log(error);
         res.status(500).send("Error updating shopping cart item: " + error);
